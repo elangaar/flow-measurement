@@ -1,0 +1,25 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block head_title %} Pomiary Przepływu Powietrza {% endblock %}
+
+{% block content %}
+<div class="row">
+<div class="form">
+<form class="login" method="POST" action="{% url 'account_login' %}">
+    {% csrf_token %}
+    <p>{{ form.login }}</p>
+    <p>{{ form.password }}</p>
+    {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+
+    <p class="link"><a href="{{ signup_url }}">{% trans "Sign Up" %}</a></p>
+    <p class="link"><a class="button secondaryAction" href="{% url 'account_reset_password'%}">
+        {% trans "Forgot Password?" %}</a></p>
+    <input type="submit" value={% trans "Sign In" %} />
+</form>
+</div>
+</div>
+
+{% endblock %}
