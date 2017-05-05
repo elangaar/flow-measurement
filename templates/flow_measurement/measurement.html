@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block head %}
+<style>
+h2 {
+    margin-bottom: 20px;
+}
+</style>
+{% endblock head %}
+{% block content %}
+<p> Wybierz stację: 
+<select>
+    <option value='0'> ----- </option>
+{% for station in stations %}
+    <option value='{{ station.id }}'> {{ station.name }} </option>
+{% endfor %}
+</select>
+</p>
+<p> Wybierz urządzenie:
+<select>
+    <option value='0'> ----- </option>
+{% for device in devices %}
+<option value='{{ device.id }}'> {{ device.name }}, {{ device.serial_number }}
+</option>
+{% endfor %}
+</select>
+</p>
+<!-- 
+<button type="button" data-toggle="modal" data-target="#modal">Wprowadź ciśnienie i
+    temperaturę </button>
+
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-hidden="true"> 
+    <div class="modal-dialog">
+        <form class="form" action="{% url 'values-form' %}" method="post">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                                                        aria-hodden="true">&times;</button>
+                    <h4 class="modal-title"> Wprowadź dane</h4>
+                </div>
+                <div class="modal-body" id="values-form-modal-body" >
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default"
+                                          data-dismiss="modal">Close</button>
+                </div>
+                
+            </div>
+        </form>
+    </div>
+</div>
+
+-->
+<input type='text' id='temperature' placeholder='temperatura' /><br />
+<input type='text' id='pressure' placeholder='ciśnienie' /><br />
+<input type='text' id='gas-meter-volume' placeholder='objętość z gazomierza' /><br />
+<input type='text' id='controller-volume' placeholder='objętość ze sterownika' /><br />
+<button type='button' id='submit-button'> Wprowadź </button>
+<div id='temp1'> </div>
+<div id='press1'> </div>
+<div id='gas1'> </div>
+<div id='contr1'> </div>
+<button id='calculate-button'> Oblicz </button>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var tempField = document.getElementById('temperature');
+    var pressField = document.getElementById('pressure');
+    var gasField = document.getElementById('gas-meter-volume');
+    var contrField = document.getElementById('controller-volume');
+    var submitButton = document.getElementById('submit-button');
+
+    submitButton.addEventListener('click', function() {
+        console.log('Klik!');
+        if (tempField.value != '' && pressField.value != '' && gasField.value
+                != '' && contrField.value != '') {
+            var temp = tempField.value;
+            var press = pressField.value;
+            var gas = gasField.value;
+            var contr = contrField.value;
+            
+            var tempNode = document.createElement('p');
+            var tempText = document.createTextNode(temp);
+            tempNode.appendChild(tempText);
+
+            var pressNode = document.createElement('p');
+            var pressText = document.createTextNode(press);
+            pressNode.appendChild(pressText);
+            
+            var gasNode = document.createElement('p');
+            var gasText = document.createTextNode(gas);
+            gasNode.appendChild(gasText);
+            
+            var contrNode = document.createElement('p');
+            var contrText = document.createTextNode(contr);
+            contrNode.appendChild(contrText);
+            
+            document.getElementById('temp1').appendChild(tempNode);
+            document.getElementById('press1').appendChild(pressNode);
+            document.getElementById('gas1').appendChild(gasNode);
+            document.getElementById('contr1').appendChild(contrNode);
+        } else {
+            console.log('Wprowadź poprawne wartości!');
+        }
+
+    });
+    var calculateButton = document.getElementById('calculate-button');
+    calculateButton.addEventListener('click', function() {
+        const Tst = 293.16;
+        const Pst = 1013.25;
+        var Tm = parseFloat(document.getElementById('temp1').children[0].innerHTML);
+        var Pm = parseFloat(document.getElementById('press1').children[0].innerHTML);
+        var Vg = parseFloat(document.getElementById('gas1').children[0].innerHTML);
+        var Vc = parseFloat(document.getElementById('contr1').children[0].innerHTML);
+
+        var expectedValue = (Vg*((Pst*Tm)/(Tst*Pm))).toFixed(2);
+
+
+        var relativeError = ((Vc-expectedValue)/expectedValue)*100;
+
+        console.log('Spodziewana wartość: ' + expectedValue);
+        console.log('Błąd względny: ' + relativeError);
+
+        
+
+    });
+    
+
+});
+</script>
+
+{% endblock content %}

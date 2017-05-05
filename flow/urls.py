@@ -17,9 +17,16 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from allauth.account import views
+# from django.views.generic import TemplateView
+from flow_measurement.views import MainPage, MeasurementView, SettingsView
+from flow_measurement.views import InfoView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.login, name='index'),
     url(r'^accounts/', include('allauth.urls')),
+    url(r'^main/', MainPage.as_view(), name='main-page'),
+    url(r'^measurement/', MeasurementView.as_view(), name='measurement'),
+    url(r'^settings/', SettingsView.as_view(), name='settings'),
+    url(r'^info/', InfoView.as_view(), name='info'),
 ]

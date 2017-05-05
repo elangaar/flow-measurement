@@ -2,10 +2,15 @@
 {% load i18n %}
 
 {% block head_title %} Pomiary Przepływu Powietrza {% endblock %}
-
+{% block head %}
+<style>
+.link {
+    font-size: x-small;
+}
+</style>
+{% endblock head %}
 {% block content %}
-<div class="row">
-<div class="form">
+<div class="centered-block">
 <form class="login" method="POST" action="{% url 'account_login' %}">
     {% csrf_token %}
     <p>{{ form.login }}</p>
@@ -19,7 +24,6 @@
         {% trans "Forgot Password?" %}</a></p>
     <input type="submit" value={% trans "Sign In" %} />
 </form>
-</div>
 </div>
 
 {% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block head %}
+<style>
+button {
+    display: block;
+    margin: 0.3em;
+}
+</style>
+{% endblock head %}
+
+{% block content %}
+<div class="centered-block">
+    <button><a href="{% url 'measurement' %}"> Pomiar </a></button><br />
+    <button><a href="{% url 'settings' %}"> Ustawienia </a></button> <br />
+    <button><a href="{% url 'info' %}"> Info </a></button><br />
+</div>
+{% endblock %}
