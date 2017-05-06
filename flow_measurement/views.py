@@ -16,6 +16,10 @@ class MeasurementView(TemplateView):
     template_name = 'flow_measurement/measurement.html'
     model = Station
 
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(MeasurementView, self).dispatch(*args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super(MeasurementView, self).get_context_data(*kwargs)
         context['stations'] = Station.objects.all()
@@ -25,6 +29,10 @@ class MeasurementView(TemplateView):
 
 class SettingsView(TemplateView):
     template_name = 'flow_measurement/settings.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(SettingsView, self).dispatch(*args, **kwargs)
 
 
 class InfoView(TemplateView):
