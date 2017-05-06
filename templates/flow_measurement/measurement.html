@@ -8,7 +8,7 @@ h2 {
 {% endblock head %}
 {% block content %}
 <p> Wybierz stację: 
-<select>
+<select id='station'>
     <option value='0'> ----- </option>
 {% for station in stations %}
     <option value='{{ station.id }}'> {{ station.name }} </option>
@@ -16,7 +16,7 @@ h2 {
 </select>
 </p>
 <p> Wybierz urządzenie:
-<select>
+<select id='device'>
     <option value='0'> ----- </option>
 {% for device in devices %}
 <option value='{{ device.id }}'> {{ device.name }}, {{ device.serial_number }}
@@ -24,16 +24,23 @@ h2 {
 {% endfor %}
 </select>
 </p>
-<input type='text' id='temperature' placeholder='temperatura' /><br />
-<input type='text' id='pressure' placeholder='ciśnienie' /><br />
-<input type='text' id='gas-meter-volume' placeholder='objętość z gazomierza' /><br />
-<input type='text' id='controller-volume' placeholder='objętość ze sterownika' /><br />
+<input type='text' id='temperature' placeholder='temperatura [&#176;C]' /><br />
+<input type='text' id='pressure' placeholder='ciśnienie [hPa]' /><br />
+<input type='text' id='gas-meter-volume' placeholder='objętość z gazomierza [m&#179;]' /><br />
+<input type='text' id='controller-volume' placeholder='objętość ze sterownika [m&#179;]' /><br />
 <button type='button' id='submit-button'> Wprowadź </button>
-<div id='temp1'> </div>
-<div id='press1'> </div>
-<div id='gas1'> </div>
-<div id='contr1'> </div>
+<p> Temperatura: <span id='temp1'></span> K </p>
+<p> Ciśnienie: <span id='press1'> </span> hPa</p>
+<p> Objętość na gazomierzu: <span id='gas1'> </span> m&#179; </p>
+<p> Objętość na sterowniku: <span id='contr1'> </span> m&#179;  </p>
 <button id='calculate-button'> Oblicz </button>
+<div id='results'> 
+    <p id='station-selected'></p>
+    <p id='device-selected'></p>
+    <p id='coefficient'></p>
+    <p id='expectedVolume'></p>
+    <p id='error'></p>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -44,34 +51,17 @@ document.addEventListener('DOMContentLoaded', function() {
     var submitButton = document.getElementById('submit-button');
 
     submitButton.addEventListener('click', function() {
-        console.log('Klik!');
         if (tempField.value != '' && pressField.value != '' && gasField.value
                 != '' && contrField.value != '') {
             var temp = tempField.value;
             var press = pressField.value;
             var gas = gasField.value;
             var contr = contrField.value;
-            
-            var tempNode = document.createElement('p');
-            var tempText = document.createTextNode(temp);
-            tempNode.appendChild(tempText);
 
-            var pressNode = document.createElement('p');
-            var pressText = document.createTextNode(press);
-            pressNode.appendChild(pressText);
-            
-            var gasNode = document.createElement('p');
-            var gasText = document.createTextNode(gas);
-            gasNode.appendChild(gasText);
-            
-            var contrNode = document.createElement('p');
-            var contrText = document.createTextNode(contr);
-            contrNode.appendChild(contrText);
-            
-            document.getElementById('temp1').appendChild(tempNode);
-            document.getElementById('press1').appendChild(pressNode);
-            document.getElementById('gas1').appendChild(gasNode);
-            document.getElementById('contr1').appendChild(contrNode);
+            document.getElementById('temp1').textContent = parseFloat(temp)+273.16;
+            document.getElementById('press1').textContent = press;
+            document.getElementById('gas1').textContent = gas;
+            document.getElementById('contr1').textContent = contr;
         } else {
             console.log('Wprowadź poprawne wartości!');
         }
@@ -81,18 +71,34 @@ document.addEventListener('DOMContentLoaded', function() {
     calculateButton.addEventListener('click', function() {
         const Tst = 293.16;
         const Pst = 1013.25;
-        var Tm = parseFloat(document.getElementById('temp1').children[0].innerHTML);
-        var Pm = parseFloat(document.getElementById('press1').children[0].innerHTML);
-        var Vg = parseFloat(document.getElementById('gas1').children[0].innerHTML);
-        var Vc = parseFloat(document.getElementById('contr1').children[0].innerHTML);
+        var Tm = parseFloat(document.getElementById('temp1').textContent);
+        var Pm = parseFloat(document.getElementById('press1').textContent);
+        var Vg = parseFloat(document.getElementById('gas1').textContent);
+        var Vc = parseFloat(document.getElementById('contr1').textContent);
+        var stationElement = document.getElementById('station');
+        var deviceElement = document.getElementById('device');
+        var station = stationElement.options[stationElement.selectedIndex].text;
+        var device = deviceElement.options[deviceElement.selectedIndex].text;
 
-        var expectedValue = (Vg*((Pst*Tm)/(Tst*Pm))).toFixed(2);
+        var coefficient = ((Pst*Tm)/(Tst*Pm));
+        var expectedVolume = Vg*coefficient;;
 
 
-        var relativeError = ((Vc-expectedValue)/expectedValue)*100;
+        var relativeError = ((Vc-expectedVolume)/expectedVolume)*100;
 
-        console.log('Spodziewana wartość: ' + expectedValue);
-        console.log('Błąd względny: ' + relativeError);
+        var stationField = document.getElementById('station-selected').textContent = 'Stacja: ' + station;
+        var deviceField = document.getElementById('device-selected').textContent = 'Urządzenie: ' + device;
+        var coefficientField = document.getElementById('coefficient').textContent = 'Współczynnik przeliczeniowy: ' + coefficient.toFixed(2);
+        var expectedVolumeField = document.getElementById('expectedVolume').textContent = 'Spodziewana wartość wskazania objętości na sterowniku: ' + expectedVolume.toFixed(2);
+        var errorField = document.getElementById('error').textContent = 'Błąd względny: ' + relativeError.toFixed(2);
+
+
+        console.log('Stacja: ' + station);
+        console.log('Urządzenie: ' + device);
+        console.log('Wartość współczynnika: ' + coefficient.toFixed(2));
+        console.log('Spodziewana wartość: ' + expectedVolume.toFixed(2));
+        console.log('Objętość na sterowniku: ' + Vc.toFixed(2));
+        console.log('Błąd względny: ' + relativeError.toFixed(2));
 
         
 
