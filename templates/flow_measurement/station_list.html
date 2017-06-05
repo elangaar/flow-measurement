@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+.modal-body .container {
+    padding: 5%;
+    height: auto;
+    width: auto;
+}
+.modal-header {
+    text-align: center;
+    vertical-align: middle;
+}
+</style>
+{% endblock head %}
+
+{% block content %}
+<h2> Stacje </h2>
+{% for station in object_list %}
+<li>{{ station.name }} </li>
+{% empty %}
+    <p> Brak stacji w bazie danych </p>
+{% endfor %}
+
+
+<button type='button' class='btn btn-default' data-toggle='modal' data-target='#add-station-modal'>
+    Dodaj stację </button>
+
+{% endblock content %}
+{% block modals %}
+<div class='modal' id='add-station-modal' tabindex='0' role='dialog'>
+    <div class='modal-dialog' role='document'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h4> Dodaj stację </h4>
+            </div>
+            <div class='modal-body'>
+            </div>
+            <div class='modal-footer'>
+                <button type='button' class='btn btn-default'
+                    data-dismiss='modal'> Zamknij </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$('.modal-body').load('/stations/add/', function() {
+    
+});
+
+
+</script>
+{% endblock modals %}
+
+

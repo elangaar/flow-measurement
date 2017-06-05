@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.urlresolvers import reverse
 
 
 class Station(models.Model):
@@ -8,6 +9,9 @@ class Station(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('stations')
 
 
 class Device(models.Model):
@@ -19,3 +23,13 @@ class Device(models.Model):
         ('regulator', 'Regulator'),
     )
     dev_type = models.CharField(max_length=20, choices=TYPES_OF_DEVICES)
+
+    def get_absolute_url(self):
+        return reverse('devices')
+
+
+class Values(models.Model):
+    temperature = models.FloatField()
+    pressure = models.FloatField()
+    gas_meter_volume = models.FloatField()
+    controller_volume = models.FloatField()

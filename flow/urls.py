@@ -17,9 +17,13 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from allauth.account import views
-# from django.views.generic import TemplateView
+from flow_measurement.views import parameters
 from flow_measurement.views import MainPage, MeasurementView, SettingsView
 from flow_measurement.views import InfoView
+from flow_measurement.views import (
+    StationListView, DeviceListView,
+    StationCreateView, DeviceCreateView
+)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -29,4 +33,9 @@ urlpatterns = [
     url(r'^measurement/', MeasurementView.as_view(), name='measurement'),
     url(r'^settings/', SettingsView.as_view(), name='settings'),
     url(r'^info/', InfoView.as_view(), name='info'),
+    url(r'^stations/add/', StationCreateView.as_view(), name='add-station'),
+    url(r'^stations/', StationListView.as_view(), name='stations'),
+    url(r'^devices/add/', DeviceCreateView.as_view(), name='add-device'),
+    url(r'^devices/', DeviceListView.as_view(), name='devices'),
+    url(r'^parameters/', parameters, name='parameters'),
 ]

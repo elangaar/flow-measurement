@@ -10,11 +10,14 @@ h2 {
 .visible {
     visibility: visible;
 }
+#test-div {
+    border: 2px solid red;
+}
 </style>
 {% endblock head %}
 {% block content %}
 <p> Wybierz stację: 
-<select id='station'>
+<select id='station' form='values-form'>
     <option value='0'> ----- </option>
 {% for station in stations %}
     <option value='{{ station.id }}'> {{ station.name }} </option>
@@ -22,7 +25,7 @@ h2 {
 </select>
 </p>
 <p> Wybierz urządzenie:
-<select id='device'>
+<select id='device' form='values-form'>
     <option value='0'> ----- </option>
 {% for device in devices %}
 <option value='{{ device.id }}'> {{ device.name }}, {{ device.serial_number }}
@@ -30,96 +33,75 @@ h2 {
 {% endfor %}
 </select>
 </p>
-<input type='text' id='temperature' placeholder='temperatura [&#176;C]' /><br />
-<input type='text' id='pressure' placeholder='ciśnienie [hPa]' /><br />
-<input type='text' id='gas-meter-volume' placeholder='objętość z gazomierza [m&#179;]' /><br />
-<input type='text' id='controller-volume' placeholder='objętość ze sterownika [m&#179;]' /><br />
-<button type='button' id='submit-button'> Wprowadź </button>
+<form method='POST' id='values-form'> {% csrf_token %}
+    <input name='temperature' type='text' id='temperature' placeholder='temperatura [&#176;C]' /><br />
+    <input type='text' id='pressure' placeholder='ciśnienie [hPa]' /><br />
+    <input type='text' id='gas-meter-volume' placeholder='objętość z gazomierza [m&#179;]' /><br />
+    <input type='text' id='controller-volume' placeholder='objętość ze sterownika [m&#179;]' /><br />
+    <input type='submit' id='submit-button' value='Wprowadź wartości' />
+</form>
 <div id='parameters'>
     <p class='hidden'> Temperatura: <span id='temp1'></span> K </p>
     <p class='hidden'> Ciśnienie: <span id='press1'> </span> hPa</p>
     <p class='hidden'> Objętość na gazomierzu: <span id='gas1'> </span> m&#179; </p>
     <p class='hidden'> Objętość na sterowniku: <span id='contr1'> </span> m&#179;  </p>
 </div>
-<button id='calculate-button' class='hidden'> Oblicz </button>
 <div id='results'> 
-    <p id='station-selected'></p>
-    <p id='device-selected'></p>
-    <p id='coefficient'></p>
-    <p id='expectedVolume'></p>
-    <p id='error'></p>
+    <p>Stacja: <span id='station-selected'> </span></p>
+    <p>Urządzenie: <span id='device-selected'> </span></p>
+    <p>Współczynnik przeliczania: <span id='coefficient'> </span></p>
+    <p>Spodziewana wartość: <span id='expectedVolume'></span></p>
+    <p>Błąd wskazania: <span id='error'></span></p>
 </div>
 
+<div id='settings'>
+    <a href='{% url "stations" %}'>Stacje</a>
+    <a href='{% url "devices" %}'>Urządzenia</a>
+</div>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'> </script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    var tempField = document.getElementById('temperature');
-    var pressField = document.getElementById('pressure');
-    var gasField = document.getElementById('gas-meter-volume');
-    var contrField = document.getElementById('controller-volume');
-    var submitButton = document.getElementById('submit-button');
-
-    submitButton.addEventListener('click', function() {
-        if (tempField.value != '' && pressField.value != '' && gasField.value
-                != '' && contrField.value != '') {
-
-            var temp = document.getElementById('temp1');
-            temp.textContent = parseFloat(tempField.value)+273.16;
-            temp.parentElement.setAttribute('class', 'visible');
-            var press = document.getElementById('press1');
-            press.textContent = pressField.value;
-            press.parentElement.setAttribute('class', 'visible');
-            var gas = document.getElementById('gas1');
-            gas.textContent = gasField.value;
-            gas.parentElement.setAttribute('class', 'visible');
-            var contr = document.getElementById('contr1');
-            contr.textContent = contrField.value;
-            contr.parentElement.setAttribute('class', 'visible');
-
-            document.getElementById('calculate-button').setAttribute('class', 'visible');
-        } else {
-            alert('Wprowadź poprawne wartości!');
+$('#values-form').on('submit', function(e) {
+    e.preventDefault();
+    addParameters();
+});
+function addParameters() {
+    $.ajax({
+        type: 'POST',
+        url: '/parameters/',
+        data: {
+            device: $('#device option:selected').val(),
+            station: $('#station option:selected').val(),
+            temperature: $('#temperature').val(),
+            pressure: $('#pressure').val(),
+            gasMeterVolume: $('#gas-meter-volume').val(),
+            controllerVolume: $('#controller-volume').val(),
+            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data) {
+            displayValues(data);
         }
 
     });
-    var calculateButton = document.getElementById('calculate-button');
-    calculateButton.addEventListener('click', function() {
-        const Tst = 293.16;
-        const Pst = 1013.25;
-        var Tm = parseFloat(document.getElementById('temp1').textContent);
-        var Pm = parseFloat(document.getElementById('press1').textContent);
-        var Vg = parseFloat(document.getElementById('gas1').textContent);
-        var Vc = parseFloat(document.getElementById('contr1').textContent);
-        var stationElement = document.getElementById('station');
-        var deviceElement = document.getElementById('device');
-        var station = stationElement.options[stationElement.selectedIndex].text;
-        var device = deviceElement.options[deviceElement.selectedIndex].text;
+}
 
-        var coefficient = ((Pst*Tm)/(Tst*Pm));
-        var expectedVolume = Vg*coefficient;;
-
-
-        var relativeError = ((Vc-expectedVolume)/expectedVolume)*100;
-
-        var stationField = document.getElementById('station-selected').textContent = 'Stacja: ' + station;
-        var deviceField = document.getElementById('device-selected').textContent = 'Urządzenie: ' + device;
-        var coefficientField = document.getElementById('coefficient').textContent = 'Współczynnik przeliczeniowy: ' + coefficient.toFixed(2);
-        var expectedVolumeField = document.getElementById('expectedVolume').textContent = 'Spodziewana wartość wskazania objętości na sterowniku: ' + expectedVolume.toFixed(2);
-        var errorField = document.getElementById('error').textContent = 'Błąd względny: ' + relativeError.toFixed(2);
-
-
-        console.log('Stacja: ' + station);
-        console.log('Urządzenie: ' + device);
-        console.log('Wartość współczynnika: ' + coefficient.toFixed(2));
-        console.log('Spodziewana wartość: ' + expectedVolume.toFixed(2));
-        console.log('Objętość na sterowniku: ' + Vc.toFixed(2));
-        console.log('Błąd względny: ' + relativeError.toFixed(2));
-
-        
-
-    });
+function displayValues(data) {
+    $('#parameters .hidden').removeClass('hidden');
+    $('#temp1').text(data['temperature']);
+    $('#press1').text(data['pressure']);
+    $('#gas1').text(data['gas_meter_volume']);
+    $('#contr1').text(data['controller_volume']);
+    $('#station-selected').text(data['station']);
+    $('#device-selected').text(data['device']);
+    $('#coefficient').text(Number(data['coefficient']).toFixed(4));
+    $('#expectedVolume').text(Number(data['theoretical_controller_volume']).toFixed(1));
+    $('#error').text(Number(data['error']).toFixed(1));
     
 
-});
+}
+
+
 </script>
 
 {% endblock content %}
