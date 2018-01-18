@@ -1,9 +1,15 @@
 {% extends "base.html" %}
-{% block head %}
-{% endblock head %}
+
+{% block style %}
+{% endblock style %}
+
+{% block head %} {% endblock head %}
 
 {% block content %}
-    <button><a href="{% url 'measurement' %}"> Pomiar </a></button><br />
-    <button><a href="{% url 'settings' %}"> Ustawienia </a></button> <br />
-    <button><a href="{% url 'info' %}"> Info </a></button><br />
+	<div class="col-md-4">
+        <a role="button" class="btn btn-block" href="{% url 'measurement' %}">measurements</a>
+        <a role="button" class="btn btn-block" href="{% url 'settings' %}">settings</a>
+        <a role="button" class="btn btn-block" href="{% url 'info' %}">information</a>
+        <a role="button" class="btn btn-block mt-4" href="{% url 'account_logout' %}">log out</a>
+    </div>
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_left_menu.html" %}
 {% block head %}
 <style>
 h2 {
@@ -10,61 +10,91 @@ h2 {
 .visible {
     visibility: visible;
 }
-#test-div {
-    border: 2px solid red;
-}
+.test {
+    border-style: solid;
+    border-color: red;
 </style>
 {% endblock head %}
-{% block content %}
-<p> Wybierz stację: 
-<select id='station' form='values-form'>
-    <option value='0'> ----- </option>
-{% for station in stations %}
-    <option value='{{ station.id }}'> {{ station.name }} </option>
-{% endfor %}
-</select>
-</p>
-<p> Wybierz urządzenie:
-<select id='device' form='values-form'>
-    <option value='0'> ----- </option>
-{% for device in devices %}
-<option value='{{ device.id }}'> {{ device.name }}, {{ device.serial_number }}
-</option>
-{% endfor %}
-</select>
-</p>
-<form method='POST' id='values-form'> {% csrf_token %}
-    <input name='temperature' type='text' id='temperature' placeholder='temperatura [&#176;C]' /><br />
-    <input type='text' id='pressure' placeholder='ciśnienie [hPa]' /><br />
-    <input type='text' id='gas-meter-volume' placeholder='objętość z gazomierza [m&#179;]' /><br />
-    <input type='text' id='controller-volume' placeholder='objętość ze sterownika [m&#179;]' /><br />
-    <input type='submit' id='submit-button' value='Wprowadź wartości' />
-</form>
-<div id='parameters'>
-    <p class='hidden'> Temperatura: <span id='temp1'></span> K </p>
-    <p class='hidden'> Ciśnienie: <span id='press1'> </span> hPa</p>
-    <p class='hidden'> Objętość na gazomierzu: <span id='gas1'> </span> m&#179; </p>
-    <p class='hidden'> Objętość na sterowniku: <span id='contr1'> </span> m&#179;  </p>
-</div>
-<div id='results'> 
-    <p>Stacja: <span id='station-selected'> </span></p>
-    <p>Urządzenie: <span id='device-selected'> </span></p>
-    <p>Współczynnik przeliczania: <span id='coefficient'> </span></p>
-    <p>Spodziewana wartość: <span id='expectedVolume'></span></p>
-    <p>Błąd wskazania: <span id='error'></span></p>
-</div>
 
-<div id='settings'>
-    <a href='{% url "stations" %}'>Stacje</a>
-    <a href='{% url "devices" %}'>Urządzenia</a>
-</div>
+{% block content %}
+	<div class="col-sm-7 text-center">
+	    <h3 class="text-left mb-3"> Measurement </h3>
+	    <div class="form-group row">
+	        <select class="form-control col-sm-10" id='station' form='values-form'>
+	            <option value='0'> station </option>
+	        {% for station in stations %}
+	            <option value='{{ station.id }}'> {{ station.name }} </option>
+	        {% endfor %}
+	        </select> <a role="button" class="btn col-sm-2" href="{% url 'add-station' %}">add</a>
+	    </div>
+	    <div class="form-group row">
+	    <select class="form-control col-sm-10" id='device-gas-meter' form='values-form'>
+	        <option value='0'> gas meter id </option>
+	    {% for device in devices %}
+	    <option value='{{ device.id }}'> {{ device.name }}, {{ device.serial_number }}
+	    </option>
+	    {% endfor %}
+	    </select><a role="button" class="btn col-sm-2" href="{% url 'add-device' %}">add</a>
+	    </div>
+	    <div class="form-group row">
+	    <select class="form-control col-sm-10" id='device-regulator ' form='values-form'>
+	        <option value='0'> regulator id </option>
+	    {% for device in devices %}
+	    <option value='{{ device.id }}'> {{ device.name }}, {{ device.serial_number }}
+	    </option>
+	    {% endfor %}
+	    </select> <a role="button" class="btn col-sm-2" href="{% url 'add-device' %}">add</a>
+	    </div>
+	    <form method='POST' id='values-form'> {% csrf_token %}
+
+				<div class="form-group row justify-content-start">
+					<div class="col-sm-10 m-0 p-0 mt-3 mb-3">
+					<input class="form-control col-sm-12" name='temperature' type='text' id='temperature' placeholder='temperature [&#176;C]' />
+					<input class="form-control col-sm-12" type='text' id='pressure' placeholder='atm. pressure [hPa]' />
+					</div>
+					<div class="col-sm-2 m-0 p-0 align-self-center">
+					<a role="button" class="btn" href="">download</a>
+					</div>
+				</div>
+
+				<div class="form-group row justify-content-start">
+					<input class="form-control col-sm-10" type='text' id='gas-meter-volume' placeholder='gas meter volume [m&#179;]' />
+				</div>
+
+				<div class="form-group row justify-content-start">
+					<input class="form-control col-sm-10" type='text' id='controller-volume' placeholder='controller volume [m&#179;]' /><br />
+				</div>
+				<input class="mt-8" type='submit' id='submit-button' value='Calculate' />
+	    </form>
+	</div>
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+		<h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		  <span aria-hidden="true">&times;</span>
+		</button>
+	      </div>
+	      <div class="modal-body">
+		...
+	      </div>
+	      <div class="modal-footer">
+		<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+		<button type="button" class="btn btn-primary btn-sm">Save changes</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
+
 
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'> </script>
 
 <script>
 $('#values-form').on('submit', function(e) {
     e.preventDefault();
-    addParameters();
+    displayValuesModal();
 });
 function addParameters() {
     $.ajax({
@@ -101,6 +131,10 @@ function displayValues(data) {
 
 }
 
+function displayValuesModal() {
+    $('#exampleModal .modal-body').html('<h4>Tutaj będą wyświetlane wykonane obliczenia. </h4>');
+    $('#exampleModal').modal('show');
+}
 
 </script>
 

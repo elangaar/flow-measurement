@@ -26,6 +26,7 @@ from flow_measurement.views import (
 )
 
 urlpatterns = [
+    url(r'^account/', include('allauth.account.urls', namespace='allauth-account')),
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.login, name='index'),
     url(r'^accounts/', include('allauth.urls')),

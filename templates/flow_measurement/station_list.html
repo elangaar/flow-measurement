@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_left_menu.html" %}
 
 {% block head %}
 <style>
@@ -15,17 +15,17 @@
 {% endblock head %}
 
 {% block content %}
-<h2> Stacje </h2>
-{% for station in object_list %}
-<li>{{ station.name }} </li>
-{% empty %}
-    <p> Brak stacji w bazie danych </p>
-{% endfor %}
+<div class="col-sm-7">
+    <h3 class="mb-3"> Stacje </h3>
+    {% for station in object_list %}
+        <h6> {{ station.name }} - {{ station.longitude }} - {{ station.latitude }} </h6>
+    {% empty %}
+        <p> Brak stacji w bazie danych </p>
+    {% endfor %}
 
-
-<button type='button' class='btn btn-default' data-toggle='modal' data-target='#add-station-modal'>
-    Dodaj stację </button>
-
+    <button role="button" class="btn mt-4" data-toggle='modal' data-target='#add-station-modal'>
+        Dodaj stację </button>
+</div>
 {% endblock content %}
 {% block modals %}
 <div class='modal' id='add-station-modal' tabindex='0' role='dialog'>
