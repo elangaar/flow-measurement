@@ -134,3 +134,5 @@ STATIC_URL = '/static/'
 SITE_ID = 1
 
 LOGIN_REDIRECT_URL = '/main/'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

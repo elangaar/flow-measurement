@@ -1,20 +1,22 @@
 {% extends "account/base.html" %}
 
+
 {% block head_title %} {% endblock %}
 {% block content %}
-<div class="centered-block">
-<form class="login" method="POST" action="{% url 'account_login' %}">
-    {% csrf_token %}
-    <p>{{ form.login }}</p>
-    <p>{{ form.password }}</p>
-    {% if redirect_field_value %}
-        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-    {% endif %}
 
-    <a role="button" class="btn m-0 p-0" href="{{ signup_url }}"><small>sign up</small></a> <br />
-    <a role="button" class="btn m-0 p-0" href="{% url 'account_reset_password'%}"> <small>forgot password?</small></a><br />
-    <input type="submit" value="sign in" />
-</form>
-</div>
+	<div class="centered-block">
+	<form class="login" method="POST" action="{% url 'account_login' %}">
+	    {% csrf_token %}
+	    <p>{{ form.login }}</p>
+	    <p>{{ form.password }}</p>
+	    {% if redirect_field_value %}
+		<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+	    {% endif %}
+
+	    <a role="button" class="btn m-0 p-0" href="{{ signup_url }}"><small>sign up</small></a> <br />
+	    <a role="button" class="btn m-0 p-0" href="{% url 'account_reset_password'%}"> <small>forgot password?</small></a><br />
+	    <input class="mt-3" type="submit" value="sign in" />
+	</form>
+	</div>
 
 {% endblock %}
