@@ -24,6 +24,9 @@ class Device(models.Model):
     )
     dev_type = models.CharField(max_length=20, choices=TYPES_OF_DEVICES)
 
+    def __str__(self):
+        return "{0}, {1}".format(self.name, self.serial_number)
+
     def get_absolute_url(self):
         return reverse('devices')
 

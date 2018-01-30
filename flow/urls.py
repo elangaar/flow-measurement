@@ -18,6 +18,8 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from allauth.account import views
 from flow_measurement.views import parameters
+from flow_measurement.views import get_temp_press
+
 from flow_measurement.views import MainPage, MeasurementView, SettingsView
 from flow_measurement.views import InfoView
 from flow_measurement.views import (
@@ -26,7 +28,6 @@ from flow_measurement.views import (
 )
 
 urlpatterns = [
-    url(r'^account/', include('allauth.account.urls', namespace='allauth-account')),
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.login, name='index'),
     url(r'^accounts/', include('allauth.urls')),
@@ -38,5 +39,7 @@ urlpatterns = [
     url(r'^stations/', StationListView.as_view(), name='stations'),
     url(r'^devices/add/', DeviceCreateView.as_view(), name='add-device'),
     url(r'^devices/', DeviceListView.as_view(), name='devices'),
+
     url(r'^parameters/', parameters, name='parameters'),
+    url(r'^get_temp_press/', get_temp_press, name='get-temp-press'),
 ]

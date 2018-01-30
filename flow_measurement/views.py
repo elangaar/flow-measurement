@@ -1,8 +1,17 @@
+import json
+import requests
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+
 from django.views.generic import TemplateView, ListView, CreateView
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.utils.decorators import method_decorator
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+
+
 from .models import Station, Device
-from django.http import HttpResponse, JsonResponse
 
 
 class MainPage(TemplateView):
@@ -40,6 +49,35 @@ class InfoView(TemplateView):
     template_name = 'flow_measurement/info.html'
 
 
+
+class StationListView(ListView):
+    model = Station
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(StationListView, self).dispatch(*args, **kwargs)
+
+
+class StationCreateView(CreateView):
+    template_name = 'flow_measurement/forms/station_create_form.html'
+    model = Station
+    fields = '__all__'
+
+
+class DeviceListView(ListView):
+    model = Device
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(DeviceListView, self).dispatch(*args, **kwargs)
+
+
+class DeviceCreateView(CreateView):
+    template_name = 'flow_measurement/forms/device_create_form.html'
+    model = Device
+    fields = '__all__'
+
+
 def parameters(request):
     P_ST = 1013
     T_ST = 293
@@ -71,28 +109,47 @@ def parameters(request):
                 'error': error
             }
         except ValueError:
-            return JsonResponse({'message': 'Coś jest nie tak z wartościami!'})
+            return JsonResponse({"message": "Coś jest nie tak z wartościami!"})
 
         return JsonResponse(json_string)
     else:
-        return HttpResponse('<p> Nie działa! </p>')
+        return HttpResponseRedirect(reverse('main-page'))
 
+def get_temp_press(request):
+    API_TOKEN = 'f82f1466e23527d47a9af5dc26373c43'
+    API_URL_BASE = 'http://api.openweathermap.org/data/2.5/weather'
+    headers = {
+        'Content-Type': 'application/json',
+    }
 
-class StationListView(ListView):
-    model = Station
+    if request.method == 'POST':
+        station_id = request.POST.get('station')
+        coordinates = json.loads(get_coordinates(station_id))
+        lat = coordinates['lat']
+        lon = coordinates['lon']
+        url_parameters = {
+            'lat': lat,
+            'lon': lon,
+            'appid': API_TOKEN
+        }
+        response = requests.get(API_URL_BASE, params=url_parameters, headers=headers)
+        data = json.loads(response.content)
+        temp = data['main']['temp']
+        press = data['main']['pressure']
 
+        json_response = {"temperature": temp, "pressure": press}
+        return JsonResponse(json_response)
+    else:
+        return HttpResponseRedirect(reverse('main-page'))
 
-class StationCreateView(CreateView):
-    template_name = 'flow_measurement/forms/station_create_form.html'
-    model = Station
-    fields = '__all__'
+## niedostepne dla usera
 
+def get_coordinates(station_id):
+        station = Station.objects.get(id=station_id)
+        coordinates = {
+            'lat': station.latitude,
+            'lon': station.longitude
+        }
+        json_data = json.dumps(coordinates)
+        return json_data
 
-class DeviceListView(ListView):
-    model = Device
-
-
-class DeviceCreateView(CreateView):
-    template_name = 'flow_measurement/forms/device_create_form.html'
-    model = Device
-    fields = '__all__'
