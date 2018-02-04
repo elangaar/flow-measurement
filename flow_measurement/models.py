@@ -1,6 +1,8 @@
 from django.db import models
+from django.http import HttpResponse
 from django.core.urlresolvers import reverse
 
+import sys
 
 class Station(models.Model):
     name = models.CharField(max_length=30)
@@ -31,8 +33,17 @@ class Device(models.Model):
         return reverse('devices')
 
 
-class Values(models.Model):
+class Result(models.Model):
+    measurement_time = models.DurationField()
     temperature = models.FloatField()
     pressure = models.FloatField()
-    gas_meter_volume = models.FloatField()
-    controller_volume = models.FloatField()
+    error = models.FloatField()
+    station = models.ForeignKey('Station', on_delete=models.CASCADE)
+    reference_device = models.ForeignKey('Device', related_name='reference_device', on_delete=models.CASCADE)
+    measured_device = models.ForeignKey('Device', related_name='measured_device', on_delete=models.CASCADE)
+
+
+class ResultDevice(models.Model):
+    volume = models.FloatField()
+    flowrate = models.FloatField()
+    device = models.ForeignKey('Device', on_delete=models.CASCADE)

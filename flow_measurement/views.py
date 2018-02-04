@@ -145,11 +145,10 @@ def get_temp_press(request):
 ## niedostepne dla usera
 
 def get_coordinates(station_id):
-        station = Station.objects.get(id=station_id)
-        coordinates = {
-            'lat': station.latitude,
-            'lon': station.longitude
-        }
-        json_data = json.dumps(coordinates)
-        return json_data
-
+    station = Station.objects.get(id=station_id)
+    coordinates = {
+        'lat': station.latitude,
+        'lon': station.longitude
+    }
+    json_data = json.dumps(coordinates)
+    return json_data
