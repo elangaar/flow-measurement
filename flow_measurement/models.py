@@ -1,8 +1,9 @@
 from django.db import models
 from django.http import HttpResponse
 from django.core.urlresolvers import reverse
+from django.contrib.auth import get_user_model
 
-import sys
+UserModel = get_user_model()
 
 class Station(models.Model):
     name = models.CharField(max_length=30)
@@ -34,16 +35,30 @@ class Device(models.Model):
 
 
 class Result(models.Model):
+    user = models.ForeignKey(UserModel)
+    date = models.DateTimeField()
     measurement_time = models.DurationField()
     temperature = models.FloatField()
     pressure = models.FloatField()
     error = models.FloatField()
     station = models.ForeignKey('Station', on_delete=models.CASCADE)
-    reference_device = models.ForeignKey('Device', related_name='reference_device', on_delete=models.CASCADE)
-    measured_device = models.ForeignKey('Device', related_name='measured_device', on_delete=models.CASCADE)
+    reference_device = models.ForeignKey(
+        'Device', related_name='reference_device',
+        on_delete=models.CASCADE)
+    measured_device = models.ForeignKey(
+        'Device', related_name='measured_device',
+        on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "{0} - {1} - {2} - {3}".format(
+            self.date, self.station, self.measured_device, self.error)
 
 
 class ResultDevice(models.Model):
     volume = models.FloatField()
     flowrate = models.FloatField()
     device = models.ForeignKey('Device', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "{0} - {1} - {2}".format(
+            self.device, self.volume, self.flowrate)
