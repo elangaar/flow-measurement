@@ -33,7 +33,12 @@ class MeasurementView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(MeasurementView, self).get_context_data(*kwargs)
         context['stations'] = Station.objects.all()
-        context['devices'] = Device.objects.all()
+        context['reference_devices'] = Device.objects.filter(
+            dev_type='reference_dev'
+        )
+        context['measured_devices'] = Device.objects.filter(
+            dev_type='measured_dev'
+        )
         return context
 
 
@@ -152,3 +157,11 @@ def get_coordinates(station_id):
     }
     json_data = json.dumps(coordinates)
     return json_data
+
+## niedostepne dla usera
+def get_todays_date(request):
+    date = datetime.date.today()
+    json_date = {
+        'date': date
+    }
+    return JsonResponse(json_date)

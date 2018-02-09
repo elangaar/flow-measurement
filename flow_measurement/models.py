@@ -16,22 +16,32 @@ class Station(models.Model):
     def get_absolute_url(self):
         return reverse('stations')
 
-
 class Device(models.Model):
     name = models.CharField(max_length=30)
     serial_number = models.CharField(max_length=30)
     TYPES_OF_DEVICES = (
-        ('gazomierz', 'Gazomierz'),
-        ('sterownik', 'Sterownik'),
-        ('regulator', 'Regulator'),
+        ('reference_dev', 'reference device'),
+        ('measured_dev', 'measured device'),
+        ('regulator', 'regulator'),
     )
     dev_type = models.CharField(max_length=20, choices=TYPES_OF_DEVICES)
+    station = models.ForeignKey('Station', null=True, blank=True)
 
     def __str__(self):
         return "{0}, {1}".format(self.name, self.serial_number)
 
     def get_absolute_url(self):
         return reverse('devices')
+
+
+class ResultDevice(models.Model):
+    volume = models.FloatField()
+    flowrate = models.FloatField()
+    device = models.ForeignKey('Device', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "{0} - {1} - {2}".format(
+            self.device, self.volume, self.flowrate)
 
 
 class Result(models.Model):
@@ -52,13 +62,3 @@ class Result(models.Model):
     def __str__(self):
         return "{0} - {1} - {2} - {3}".format(
             self.date, self.station, self.measured_device, self.error)
-
-
-class ResultDevice(models.Model):
-    volume = models.FloatField()
-    flowrate = models.FloatField()
-    device = models.ForeignKey('Device', on_delete=models.CASCADE)
-
-    def __str__(self):
-        return "{0} - {1} - {2}".format(
-            self.device, self.volume, self.flowrate)

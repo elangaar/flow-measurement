@@ -19,6 +19,7 @@ from django.contrib import admin
 from allauth.account import views
 from flow_measurement.views import parameters
 from flow_measurement.views import get_temp_press
+from flow_measurement.views import get_todays_date
 
 from flow_measurement.views import MainPage, MeasurementView, SettingsView
 from flow_measurement.views import InfoView
@@ -42,4 +43,5 @@ urlpatterns = [
 
     url(r'^parameters/', parameters, name='parameters'),
     url(r'^get_temp_press/', get_temp_press, name='get-temp-press'),
+    url(r'^get_todays_date/', get_todays_date, name='todays_date'),
 ]
