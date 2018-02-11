@@ -38,7 +38,7 @@ h2 {
             </select><a role="button" class="btn col-sm-2" href="{% url 'add-device' %}">add</a>
             </div>
             <div class="form-group row">
-            <select class="form-control col-sm-10" id='measured-device ' form='values-form'>
+            <select class="form-control col-sm-10" id='measured-device' form='values-form'>
                 <option value='0'> measured device </option>
             {% for device in measured_devices %}
             <option value='{{ device.id }}'> {{ device.name }}, {{ device.serial_number }}
@@ -50,9 +50,8 @@ h2 {
 				<div class="form-group row justify-content-start">
 					<div class="col-sm-10 m-0 p-0 mt-3 mb-3">
                         <input class="form-control col-sm-12"
-                               name='temperature' type='number' step='0.01' id='temperature' placeholder='temperature [&#176;C]' />
-                        <input class="form-control col-sm-12" name='pressure'
-                        type='number' step='0.01' id='pressure' placeholder='atm. pressure [hPa]' />
+                               name='temperature' type='number' step='0.1' id='temperature' placeholder='temperature [&#176;C]' />
+                        <input class="form-control col-sm-12" name='pressure' type='number' step='0.01' id='pressure' placeholder='atm. pressure [hPa]' />
 					</div>
 					<div class="col-sm-2 m-0 p-0 align-self-center">
                         <a role="button" id="btn-temp-press" class="btn" href="">download</a>
@@ -77,9 +76,9 @@ h2 {
 
 				<div class="form-group row justify-content-start">
 					<input class="form-control col-sm-10" type='number'
-                    id='measured-device' placeholder='measured volume volume [m&#179;]' /><br />
+                    id='measured-device-volume' placeholder='measured device volume [m&#179;]' /><br />
 				</div>
-				<input class="mt-8" type='submit' id='submit-button' value='Calculate' />
+				<input class="mt-8" type='submit' id='submit-button' value='calculate' />
 	    </form>
 	</div>
 	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -148,23 +147,28 @@ $('#btn-today').on('click', function(e) {
 
 $('#values-form').on('submit', function(e) {
     e.preventDefault();
-    displayValuesModal();
+    addParameters();
 });
 
 function addParameters() {
+    console.log($('#measurement_date').val())
     $.ajax({
         type: 'POST',
         url: '/parameters/',
         data: {
-            device: $('#device option:selected').val(),
             station: $('#station option:selected').val(),
+            reference_device: $('#reference-device option:selected').val(),
+            measured_device: $('#measured-device option:selected').val(),
             temperature: $('#temperature').val(),
             pressure: $('#pressure').val(),
-            gasMeterVolume: $('#gas-meter-volume').val(),
-            controllerVolume: $('#controller-volume').val(),
+            measurement_date: $('#measurement-date').val(),
+            measurement_time: $('#measurement-time').val(),
+            refDevVolume: $('#reference-device-volume').val(),
+            measDevVolume: $('#measured-device-volume').val(),
             csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
         },
         success: function(data) {
+            console.log('It works!');
             displayValues(data);
         }
 
@@ -172,23 +176,14 @@ function addParameters() {
 }
 
 function displayValues(data) {
-    $('#parameters .hidden').removeClass('hidden');
-    $('#temp1').text(data['temperature']);
-    $('#press1').text(data['pressure']);
-    $('#gas1').text(data['gas_meter_volume']);
-    $('#contr1').text(data['controller_volume']);
-    $('#station-selected').text(data['station']);
-    $('#device-selected').text(data['device']);
-    $('#coefficient').text(Number(data['coefficient']).toFixed(4));
-    $('#expectedVolume').text(Number(data['theoretical_controller_volume']).toFixed(1));
-    $('#error').text(Number(data['error']).toFixed(1));
+    console.log(data);
+    $('#exampleModal .modal-body').html(data);
+    $('#exampleModal').modal('show');
     
 
 }
 
 function displayValuesModal() {
-    $('#exampleModal .modal-body').html('<h4>Tutaj będą wyświetlane wykonane obliczenia. </h4>');
-    $('#exampleModal').modal('show');
 }
 
 </script>

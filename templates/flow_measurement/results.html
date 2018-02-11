@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table>
+    <tr>
+        <td>station:</td> <td>{{ station }}</td>
+    </tr>
+    <tr>
+        <td>reference device:</td> <td>{{ reference_device }}</td>
+    </tr>
+    <tr>
+        <td>measured device:</td> <td>{{ measured_device }}</td>
+    </tr>
+    <tr>
+        <td>temperature:</td> <td>{{ temperature }}</td>
+    </tr>
+    <tr>
+        <td>pressure:</td> <td>{{ pressure }}</td>
+    </tr>date
+    <tr>
+        <td>date:</td> <td>{{ measurement_date }}</td>
+    </tr>
+        <td>measurement time:</td> <td>{{ measurement_time }}</td>
+    </tr>
+    </tr>
+        <td>reference device volume:</td> <td>{{ ref_dev_volume }}</td>
+    </tr>
+    </tr>
+        <td>measured device volume:</td> <td>{{ meas_dev_volume }}</td>
+    </tr>
+    </tr>
+        <td>error:</td> <td>{{ error }}</td>
+    </tr>
+</table>
+{% endblock content %}

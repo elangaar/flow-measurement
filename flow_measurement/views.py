@@ -1,6 +1,7 @@
+import datetime
 import json
-import requests
 import logging
+import requests
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -9,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.utils.decorators import method_decorator
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
 
 
 from .models import Station, Device
@@ -88,37 +90,46 @@ def parameters(request):
     T_ST = 293
     if request.method == 'POST':
         try:
-            stat_id = request.POST.get('station')
-            stat = Station.objects.get(id=stat_id)
-            stat_name = stat.name
-            dev_id = request.POST.get('device')
-            dev = Device.objects.get(id=dev_id)
-            dev_name = dev.name + ', ' + dev.serial_number
+            station_id = request.POST.get('station')
+            station = Station.objects.get(id=station_id)
+            station_name = station.name
+            ref_dev_id = request.POST.get('reference_device')
+            ref_dev = Device.objects.get(id=ref_dev_id)
+            meas_dev_id = request.POST.get('measured_device')
+            meas_dev = Device.objects.get(id=meas_dev_id)
+            # dev_name = dev.name + ', ' + dev.serial_number
 
             temperature = float(request.POST.get('temperature')) + 273
             pressure = float(request.POST.get('pressure'))
-            gas_meter_volume = float(request.POST.get('gasMeterVolume'))
-            cv = float(request.POST.get('controllerVolume'))
+            meas_date = request.POST.get('measurement_date')
+            meas_time = request.POST.get('measurement_time')
+            ref_dev_volume = float(request.POST.get('refDevVolume'))
+            meas_dev_volume = float(request.POST.get('measDevVolume'))
             coefficient = (P_ST * temperature)/(T_ST * pressure)
-            tcv = gas_meter_volume * coefficient
-            error = ((cv - tcv) / tcv) * 100
-            json_string = {
-                'station': stat_name,
-                'device': dev_name,
+            tcv = ref_dev_volume * coefficient
+            error = ((meas_dev_volume - tcv) / tcv) * 100
+            json_data = {
+                'station': station_name,
+                'reference_device': ref_dev,
+                'measured_device': meas_dev,
                 'temperature': temperature,
                 'pressure': pressure,
-                'gas_meter_volume': gas_meter_volume,
-                'controller_volume': cv,
+                'measurement_date': meas_date,
+                'measurement_time': meas_time,
+                'ref_dev_volume': ref_dev_volume,
+                'meas_dev_volume': meas_dev_volume,
                 'coefficient': coefficient,
                 'theoretical_controller_volume': tcv,
                 'error': error
             }
-        except ValueError:
-            return JsonResponse({"message": "Coś jest nie tak z wartościami!"})
+        except ValueError as e:
+            message = str(e)
+            return JsonResponse({"message": message})
 
-        return JsonResponse(json_string)
+        return render(request, 'flow_measurement/results.html', json_data)
     else:
         return HttpResponseRedirect(reverse('main-page'))
+
 
 def get_temp_press(request):
     API_TOKEN = 'f82f1466e23527d47a9af5dc26373c43'
@@ -139,7 +150,8 @@ def get_temp_press(request):
         }
         response = requests.get(API_URL_BASE, params=url_parameters, headers=headers)
         data = json.loads(response.content)
-        temp = data['main']['temp']
+        temp_k = float(data['main']['temp']) - 273
+        temp = '{:.1f}'.format(temp_k)
         press = data['main']['pressure']
 
         json_response = {"temperature": temp, "pressure": press}
@@ -148,7 +160,6 @@ def get_temp_press(request):
         return HttpResponseRedirect(reverse('main-page'))
 
 ## niedostepne dla usera
-
 def get_coordinates(station_id):
     station = Station.objects.get(id=station_id)
     coordinates = {
