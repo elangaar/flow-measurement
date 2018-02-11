@@ -13,6 +13,7 @@ h2 {
 .test {
     border-style: solid;
     border-color: red;
+}
 </style>
 {% endblock head %}
 
@@ -71,26 +72,26 @@ h2 {
 
 				<div class="form-group row justify-content-start">
 					<input class="form-control col-sm-10" type='number'
-                    id='reference-device-volume' placeholder='reference device volume [m&#179;]' />
+                    id='reference-device-volume' placeholder='reference device volume [dm&#179;]' />
 				</div>
 
 				<div class="form-group row justify-content-start">
 					<input class="form-control col-sm-10" type='number'
-                    id='measured-device-volume' placeholder='measured device volume [m&#179;]' /><br />
+                    id='measured-device-volume' placeholder='measured device volume [dm&#179;]' /><br />
 				</div>
 				<input class="mt-8" type='submit' id='submit-button' value='calculate' />
 	    </form>
 	</div>
-	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal fade" id="resultsModal" tabindex="-1" role="dialog" aria-labelledby="resultsModalLabel" aria-hidden="true">
 	  <div class="modal-dialog" role="document">
 	    <div class="modal-content">
 	      <div class="modal-header">
-		<h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+		<h5 class="modal-title" id="resultsModalLabel">measurement results</h5>
 		<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 		  <span aria-hidden="true">&times;</span>
 		</button>
 	      </div>
-	      <div class="modal-body">
+	      <div class="modal-body px-auto mx-auto mw-100">
 		...
 	      </div>
 	      <div class="modal-footer">
@@ -140,7 +141,7 @@ $('#btn-today').on('click', function(e) {
             csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
         },
         success: function(data) {
-            $('#measurement-date').val(data['date']);
+            $('#measurement-date').val(data['current_date']);
         },
     })
 });
@@ -177,8 +178,8 @@ function addParameters() {
 
 function displayValues(data) {
     console.log(data);
-    $('#exampleModal .modal-body').html(data);
-    $('#exampleModal').modal('show');
+    $('#resultsModal .modal-body').html(data);
+    $('#resultsModal').modal('show');
     
 
 }

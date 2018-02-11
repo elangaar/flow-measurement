@@ -103,4 +103,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+*.swo
 >>>>>>> 1fefa74edea37d9e7c7d0fe2381e489204061cc8

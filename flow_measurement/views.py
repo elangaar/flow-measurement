@@ -97,17 +97,17 @@ def parameters(request):
             ref_dev = Device.objects.get(id=ref_dev_id)
             meas_dev_id = request.POST.get('measured_device')
             meas_dev = Device.objects.get(id=meas_dev_id)
-            # dev_name = dev.name + ', ' + dev.serial_number
-
-            temperature = float(request.POST.get('temperature')) + 273
+            temperature = float(request.POST.get('temperature'))
+            temp_k = temperature + 273
             pressure = float(request.POST.get('pressure'))
             meas_date = request.POST.get('measurement_date')
             meas_time = request.POST.get('measurement_time')
             ref_dev_volume = float(request.POST.get('refDevVolume'))
             meas_dev_volume = float(request.POST.get('measDevVolume'))
-            coefficient = (P_ST * temperature)/(T_ST * pressure)
-            tcv = ref_dev_volume * coefficient
-            error = ((meas_dev_volume - tcv) / tcv) * 100
+            coeff = (P_ST * temp_k)/(T_ST * pressure)
+            tcv = ref_dev_volume * coeff
+            coefficient = format(coeff, '.4f')
+            error = format((((meas_dev_volume - tcv) / tcv) * 100), '.2f')
             json_data = {
                 'station': station_name,
                 'reference_device': ref_dev,
@@ -171,8 +171,8 @@ def get_coordinates(station_id):
 
 ## niedostepne dla usera
 def get_todays_date(request):
-    date = datetime.date.today()
+    current_date = datetime.date.today()
     json_date = {
-        'date': date
+        'current_date': current_date
     }
     return JsonResponse(json_date)
