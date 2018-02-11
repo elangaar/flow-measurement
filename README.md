@@ -62,4 +62,4 @@ $ python3 manage.py test flow_measurement/tests/
 
 
 ## License
-FlowMeasurements is licensed under the terms of the MIT License (see the file LICENSE).
+FlowMeasurement is licensed under the terms of the MIT License (see the file LICENSE).
