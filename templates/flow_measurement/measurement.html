@@ -66,17 +66,17 @@ h2 {
 				</div>
 
 				<div class="form-group row justify-content-start">
-					<input class="form-control col-sm-10" type='time'
+					<input class="form-control col-sm-10" type='time' step='1'
                     id='measurement-time' placeholder='measurement time [m:s]' />
 				</div>
 
 				<div class="form-group row justify-content-start">
-					<input class="form-control col-sm-10" type='number'
+					<input class="form-control col-sm-10" type='number' step='0.01'
                     id='reference-device-volume' placeholder='reference device volume [dm&#179;]' />
 				</div>
 
 				<div class="form-group row justify-content-start">
-					<input class="form-control col-sm-10" type='number'
+					<input class="form-control col-sm-10" type='number' step='0.01'
                     id='measured-device-volume' placeholder='measured device volume [dm&#179;]' /><br />
 				</div>
 				<input class="mt-8" type='submit' id='submit-button' value='calculate' />
@@ -180,8 +180,6 @@ function displayValues(data) {
     console.log(data);
     $('#resultsModal .modal-body').html(data);
     $('#resultsModal').modal('show');
-    
-
 }
 
 function displayValuesModal() {

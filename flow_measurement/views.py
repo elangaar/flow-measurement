@@ -1,4 +1,5 @@
 import datetime
+import time
 import json
 import logging
 import requests
@@ -106,6 +107,8 @@ def parameters(request):
             meas_dev_volume = float(request.POST.get('measDevVolume'))
             coeff = (P_ST * temp_k)/(T_ST * pressure)
             tcv = ref_dev_volume * coeff
+            flowrate_ref_dev = get_flowrate(ref_dev_volume, meas_time)
+            flowrate_meas_dev = get_flowrate(meas_dev_volume, meas_time)
             coefficient = format(coeff, '.4f')
             error = format((((meas_dev_volume - tcv) / tcv) * 100), '.2f')
             json_data = {
@@ -118,6 +121,8 @@ def parameters(request):
                 'measurement_time': meas_time,
                 'ref_dev_volume': ref_dev_volume,
                 'meas_dev_volume': meas_dev_volume,
+                'flowrate_ref_dev': flowrate_ref_dev,
+                'flowrate_meas_dev': flowrate_meas_dev,
                 'coefficient': coefficient,
                 'theoretical_controller_volume': tcv,
                 'error': error
@@ -176,3 +181,27 @@ def get_todays_date(request):
         'current_date': current_date
     }
     return JsonResponse(json_date)
+
+
+def get_flowrate(volume, meas_time):
+    if len(meas_time) == 5:
+        meas_time = time.strptime(meas_time, '%H:%M')
+        meas_time_delta = datetime.timedelta(
+            hours=meas_time.tm_hour,
+            minutes=meas_time.tm_min
+        )
+        meas_time_minutes = meas_time_delta.seconds / 60
+        flowrate = format(volume / meas_time_minutes, '.2f')
+        return flowrate
+    elif len(meas_time) == 8:
+        meas_time = time.strptime(meas_time, '%H:%M:%S')
+        meas_time_delta = datetime.timedelta(
+            hours=meas_time.tm_hour,
+            minutes=meas_time.tm_min,
+            seconds=meas_time.tm_sec
+        )
+        meas_time_minutes = meas_time_delta.seconds / 60
+        flowrate = format(volume / meas_time_minutes, '.2f')
+        return flowrate
+    else:
+        return None

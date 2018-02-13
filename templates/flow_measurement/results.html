@@ -34,13 +34,19 @@ table td:nth-child(2) {
     <tr>
         <td>date:</td> <td>{{ measurement_date }} </td>
     </tr>
-        <td>measurement time:</td> <td>{{ measurement_time }} min:sec</td>
+        <td>measurement time:</td> <td>{{ measurement_time }}</td>
     </tr>
     </tr>
     <td>reference device volume:</td> <td>{{ ref_dev_volume }} dm&#179;</td>
     </tr>
     </tr>
         <td>measured device volume:</td> <td>{{ meas_dev_volume }} dm&#179;</td>
+    </tr>
+    </tr>
+        <td>measured device flowrate:</td> <td>{{ flowrate_ref_dev }} dm&#179;/min</td>
+    </tr>
+    </tr>
+        <td>reference device flowrate:</td> <td>{{ flowrate_meas_dev }} dm&#179;/min</td>
     </tr>
     <tr>
         <td>coefficient:</td> <td>{{ coefficient }}</td>
