@@ -46,19 +46,19 @@ class ResultDevice(models.Model):
 
 class Result(models.Model):
     user = models.ForeignKey(UserModel)
-    date = models.DateTimeField()
+    measurement_date = models.DateTimeField()
     measurement_time = models.DurationField()
     temperature = models.FloatField()
     pressure = models.FloatField()
     error = models.FloatField()
     station = models.ForeignKey('Station', on_delete=models.CASCADE)
     reference_device = models.ForeignKey(
-        'Device', related_name='reference_device',
+        'ResultDevice', related_name='reference_device',
         on_delete=models.CASCADE)
     measured_device = models.ForeignKey(
-        'Device', related_name='measured_device',
+        'ResultDevice', related_name='measured_device',
         on_delete=models.CASCADE)
 
     def __str__(self):
-        return "{0} - {1} - {2} - {3}".format(
-            self.date, self.station, self.measured_device, self.error)
+        return '{0} - {1} - {2} - {3} - {4}'.format(
+            self.measurement_date, self.user, self.station, self.measured_device, self.error)

@@ -13,8 +13,7 @@ from django.utils.decorators import method_decorator
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 
-
-from .models import Station, Device
+from .models import Station, Device, Result, ResultDevice
 
 
 class MainPage(TemplateView):
@@ -94,7 +93,7 @@ def parameters(request):
             station_id = request.POST.get('station')
             station = Station.objects.get(id=station_id)
             station_name = station.name
-            ref_dev_id = request.POST.get('reference_device')
+            ref_dev_id = request.POST.get('referenced_device')
             ref_dev = Device.objects.get(id=ref_dev_id)
             meas_dev_id = request.POST.get('measured_device')
             meas_dev = Device.objects.get(id=meas_dev_id)
@@ -135,9 +134,84 @@ def parameters(request):
     else:
         return HttpResponseRedirect(reverse('main-page'))
 
+def save_results(request):
+    P_ST = 1013
+    T_ST = 293
+    if request.method == 'POST':
+        referenced_device_id = request.POST.get('referenced_device')
+        referenced_device = Device.objects.get(id=referenced_device_id)
+        measured_device_id = request.POST.get('measured_device')
+        measured_device = Device.objects.get(id=measured_device_id)
+        referenced_volume = request.POST.get('refDevVolume')
+        measured_volume = request.POST.get('measDevVolume')
+        temperature = float(request.POST.get('temperature'))
+        temp_k = temperature + 273
+        pressure = float(request.POST.get('pressure'))
+        measurement_date = request.POST.get('measurement_date')
+        measurement_time = request.POST.get('measurement_time')
+        referenced_volume = float(request.POST.get('refDevVolume'))
+        measured_volume = float(request.POST.get('measDevVolume'))
+        coeff = (P_ST * temp_k)/(T_ST * pressure)
+        tcv = referenced_volume * coeff
+        referenced_flowrate= get_flowrate(referenced_volume, measurement_time)
+        measured_flowrate= get_flowrate(measured_volume, measurement_time)
+        coefficient = format(coeff, '.4f')
+        error = format((((measured_volume - tcv) / tcv) * 100), '.2f')
+
+        result_referenced_device = ResultDevice.objects.create(
+            volume=referenced_volume,
+            flowrate=referenced_flowrate,
+            device=referenced_device
+        )
+        result_measured_device = ResultDevice.objects.create(
+            volume=measured_volume,
+            flowrate=measured_flowrate,
+            device=measured_device
+        )
+        result_referenced_device.save()
+        result_measured_device.save()
+
+        station_id = request.POST.get('station')
+        station = Station.objects.get(id=station_id)
+        user = request.user
+        measurement_date = request.POST.get('measurement_date')
+        measurement_time_str = request.POST.get('measurement_time')
+        measurement_time = get_time(measurement_time_str)
+        temperature = request.POST.get('temperature')
+        pressure = request.POST.get('pressure')
+        reference_device = result_referenced_device
+        measured_device = result_measured_device
+
+        result = Result.objects.create(
+            user=user,
+            measurement_date=measurement_date,
+            measurement_time=measurement_time,
+            temperature=temperature,
+            pressure=pressure,
+            error=error,
+            station=station,
+            reference_device=reference_device,
+            measured_device=measured_device,
+        )
+        result.save()
+        return JsonResponse({'success': True})
+
+def get_time(time_str):
+    time_list = time_str.split(':')
+    if len(time_list) == 2:
+        hours, minutes = time_list
+        measurement_time = datetime.timedelta(hours=int(hours),
+                minutes=int(minutes))
+    elif len(time_list) == 3:
+        hours, minutes, seconds = time_list
+        measurement_time = datetime.timedelta(hours=int(hours),
+                minutes=int(minutes), seconds=int(seconds))
+    else:
+        pass
+    return measurement_time
 
 def get_temp_press(request):
-    API_TOKEN = 'f82f1466e23527d47a9af5dc26373c43'
+    API_TOKEN = 'API_KEY'
     API_URL_BASE = 'http://api.openweathermap.org/data/2.5/weather'
     headers = {
         'Content-Type': 'application/json',

@@ -30,7 +30,7 @@ h2 {
                 </select> <a role="button" class="btn col-sm-2" href="{% url 'add-station' %}">add</a>
             </div>
             <div class="form-group row">
-            <select class="form-control col-sm-10" id='reference-device' form='values-form'>
+            <select class="form-control col-sm-10" id='referenced-device' form='values-form'>
                 <option value='0'> reference device </option>
             {% for device in reference_devices %}
             <option value='{{ device.id }}'> {{ device.name }}, {{ device.serial_number }}
@@ -95,18 +95,48 @@ h2 {
 		...
 	      </div>
 	      <div class="modal-footer">
-		<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
-		<button type="button" class="btn btn-primary btn-sm">Save changes</button>
+		<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">cancel</button>
+		<button type="button" id="btn-save-results" class="btn btn-primary btn-sm" data-dismiss="modal">save changes</button>
 	      </div>
 	    </div>
 	  </div>
 	</div>
-
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">success</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              <h6>The data has been correctly saved to the database</h6>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">close</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
 
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'> </script>
 
 <script>
+
+$('#btn-save-results').on('click', function(e) {
+    e.preventDefault();
+    var data = fetch_parameters();
+    $.ajax({
+        type: 'POST',
+        url: '/save_results/',
+        data: data,
+        success: function(data) {
+            $('#successModal').modal('show');
+        }
+    });
+});
 
 $('#btn-temp-press').on('click', function(e) {
     e.preventDefault();
@@ -146,30 +176,35 @@ $('#btn-today').on('click', function(e) {
     })
 });
 
+function fetch_parameters(e) {
+    var data_parameters = {}
+    data_parameters['station'] = $('#station option:selected').val()
+    data_parameters['referenced_device'] = $('#referenced-device option:selected').val()
+    data_parameters['measured_device'] = $('#measured-device option:selected').val()
+    data_parameters['temperature'] = $('#temperature').val()
+    data_parameters['pressure'] = $('#pressure').val()
+    data_parameters['measurement_date'] = $('#measurement-date').val()
+    data_parameters['measurement_time'] = $('#measurement-time').val()
+    data_parameters['refDevVolume'] = $('#reference-device-volume').val()
+    data_parameters['measDevVolume'] = $('#measured-device-volume').val()
+    data_parameters['csrfmiddlewaretoken'] = $('input[name=csrfmiddlewaretoken]').val()
+    return data_parameters;
+}
+
 $('#values-form').on('submit', function(e) {
     e.preventDefault();
+    data_parameters = fetch_parameters();
     addParameters();
 });
 
+
+
 function addParameters() {
-    console.log($('#measurement_date').val())
     $.ajax({
         type: 'POST',
         url: '/parameters/',
-        data: {
-            station: $('#station option:selected').val(),
-            reference_device: $('#reference-device option:selected').val(),
-            measured_device: $('#measured-device option:selected').val(),
-            temperature: $('#temperature').val(),
-            pressure: $('#pressure').val(),
-            measurement_date: $('#measurement-date').val(),
-            measurement_time: $('#measurement-time').val(),
-            refDevVolume: $('#reference-device-volume').val(),
-            measDevVolume: $('#measured-device-volume').val(),
-            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-        },
+        data: data_parameters,
         success: function(data) {
-            console.log('It works!');
             displayValues(data);
         }
 
@@ -177,7 +212,6 @@ function addParameters() {
 }
 
 function displayValues(data) {
-    console.log(data);
     $('#resultsModal .modal-body').html(data);
     $('#resultsModal').modal('show');
 }
@@ -188,3 +222,4 @@ function displayValuesModal() {
 </script>
 
 {% endblock content %}
+
