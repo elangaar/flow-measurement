@@ -1,5 +1,6 @@
 {% extends "base_left_menu.html" %}
 
+{% block head_title %}devices{% endblock head_title %}
 {% block head %}
 <style>
 .modal-body .container {
@@ -16,15 +17,15 @@
 {% endblock head %}
 
 {% block content %}
-<div class="col-sm-7">
-    <h3 class="mb-3"> Urządzenia </h3>
+<div class="col-sm-7" id="devices-list">
+    <h3 class="mb-3">devices</h3>
     {% for device in object_list %}
         <h6> {{ device.name }}, {{ device.serial_number }} </h6>
     {% empty %}
-        <p> Brak urządzeń w bazie danych </p>
+        <p>no devices in the database</p>
     {% endfor %}
 
-    <button role="button" class="btn mt-4" data-toggle='modal' data-target='#add-device-modal'> Dodaj urządzenie </button>
+    <button name="add-device" role="button" class="btn mt-4" data-toggle='modal' data-target='#add-device-modal'>add device</button>
 </div>
 
 {% endblock content %}
@@ -34,13 +35,13 @@
     <div class='modal-dialog' role='document'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h4> Dodaj urządzenie </h4>
+                <h4>add device</h4>
             </div>
             <div class='modal-body'>
             </div>
             <div class='modal-footer'>
                 <button type='button' class='btn btn-default'
-                    data-dismiss='modal'>Zamknij</button>
+                    data-dismiss='modal'>close</button>
             </div>
         </div>
     </div>

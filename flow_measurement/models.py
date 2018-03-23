@@ -17,21 +17,31 @@ class Station(models.Model):
         return reverse('stations')
 
 class Device(models.Model):
-    name = models.CharField(max_length=30)
-    serial_number = models.CharField(max_length=30)
+    name = models.CharField(max_length=36)
+    serial_number = models.CharField(max_length=35)
     TYPES_OF_DEVICES = (
         ('reference_dev', 'reference device'),
         ('measured_dev', 'measured device'),
         ('regulator', 'regulator'),
     )
     dev_type = models.CharField(max_length=20, choices=TYPES_OF_DEVICES)
-    station = models.ForeignKey('Station', null=True, blank=True)
 
     def __str__(self):
         return "{0}, {1}".format(self.name, self.serial_number)
 
     def get_absolute_url(self):
         return reverse('devices')
+
+
+class StationDevice(models.Model):
+    device = models.ForeignKey('Device')
+    station = models.ForeignKey('Station')
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return '{0} - {1} - {2} - {3}'.format(self.device, self.station,
+                self.start_date, self.end_date)
 
 
 class ResultDevice(models.Model):
@@ -51,7 +61,7 @@ class Result(models.Model):
     temperature = models.FloatField()
     pressure = models.FloatField()
     error = models.FloatField()
-    station = models.ForeignKey('Station', on_delete=models.CASCADE)
+    station = models.ForeignKey('Station')
     reference_device = models.ForeignKey(
         'ResultDevice', related_name='reference_device',
         on_delete=models.CASCADE)

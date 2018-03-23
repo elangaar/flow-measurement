@@ -1,19 +1,18 @@
 import datetime
 import time
 import json
-import logging
 import requests
-logging.basicConfig(level=logging.DEBUG)
 
 
 from django.views.generic import TemplateView, ListView, CreateView
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.utils.decorators import method_decorator
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 
-from .models import Station, Device, Result, ResultDevice
+from .models import Station, Device, Result, ResultDevice, StationDevice
+from .forms import DeviceForm
 
 
 class MainPage(TemplateView):
@@ -33,7 +32,7 @@ class MeasurementView(TemplateView):
         return super(MeasurementView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        context = super(MeasurementView, self).get_context_data(*kwargs)
+        context = super(MeasurementView, self).get_context_data(**kwargs)
         context['stations'] = Station.objects.all()
         context['reference_devices'] = Device.objects.filter(
             dev_type='reference_dev'
@@ -54,7 +53,6 @@ class SettingsView(TemplateView):
 
 class InfoView(TemplateView):
     template_name = 'flow_measurement/info.html'
-
 
 
 class StationListView(ListView):
@@ -82,7 +80,19 @@ class DeviceListView(ListView):
 class DeviceCreateView(CreateView):
     template_name = 'flow_measurement/forms/device_create_form.html'
     model = Device
-    fields = '__all__'
+    form_class = DeviceForm
+
+    def form_valid(self, form):
+        if form.cleaned_data.get('station') is not None:
+            form.save()
+            device_name = form.cleaned_data.get('name')
+            device = Device.objects.get(name=device_name)
+            station = form.cleaned_data['station']
+            start_date= datetime.date.today()
+            sd = StationDevice.objects.create(device=device, station=station, start_date=start_date)
+            sd.save()
+        form.save()
+        return super().form_valid(form)
 
 
 def parameters(request):
@@ -134,6 +144,7 @@ def parameters(request):
     else:
         return HttpResponseRedirect(reverse('main-page'))
 
+
 def save_results(request):
     P_ST = 1013
     T_ST = 293
@@ -157,8 +168,7 @@ def save_results(request):
         measured_flowrate= get_flowrate(measured_volume, measurement_time)
         coefficient = format(coeff, '.4f')
         error = format((((measured_volume - tcv) / tcv) * 100), '.2f')
-
-        result_referenced_device = ResultDevice.objects.create(
+result_referenced_device = ResultDevice.objects.create(
             volume=referenced_volume,
             flowrate=referenced_flowrate,
             device=referenced_device
@@ -170,7 +180,6 @@ def save_results(request):
         )
         result_referenced_device.save()
         result_measured_device.save()
-
         station_id = request.POST.get('station')
         station = Station.objects.get(id=station_id)
         user = request.user
@@ -181,7 +190,6 @@ def save_results(request):
         pressure = request.POST.get('pressure')
         reference_device = result_referenced_device
         measured_device = result_measured_device
-
         result = Result.objects.create(
             user=user,
             measurement_date=measurement_date,
@@ -195,6 +203,7 @@ def save_results(request):
         )
         result.save()
         return JsonResponse({'success': True})
+
 
 def get_time(time_str):
     time_list = time_str.split(':')
@@ -210,13 +219,13 @@ def get_time(time_str):
         pass
     return measurement_time
 
+
 def get_temp_press(request):
-    API_TOKEN = 'API_KEY'
+    API_TOKEN = 'f82f1466e23527d47a9af5dc26373c43'
     API_URL_BASE = 'http://api.openweathermap.org/data/2.5/weather'
     headers = {
         'Content-Type': 'application/json',
     }
-
     if request.method == 'POST':
         station_id = request.POST.get('station')
         coordinates = json.loads(get_coordinates(station_id))
@@ -232,13 +241,12 @@ def get_temp_press(request):
         temp_k = float(data['main']['temp']) - 273
         temp = '{:.1f}'.format(temp_k)
         press = data['main']['pressure']
-
         json_response = {"temperature": temp, "pressure": press}
         return JsonResponse(json_response)
     else:
         return HttpResponseRedirect(reverse('main-page'))
 
-## niedostepne dla usera
+
 def get_coordinates(station_id):
     station = Station.objects.get(id=station_id)
     coordinates = {
@@ -248,7 +256,7 @@ def get_coordinates(station_id):
     json_data = json.dumps(coordinates)
     return json_data
 
-## niedostepne dla usera
+
 def get_todays_date(request):
     current_date = datetime.date.today()
     json_date = {

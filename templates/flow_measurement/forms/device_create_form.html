@@ -4,7 +4,7 @@
 
 <form action='{% url "add-device" %}' method='POST'> {% csrf_token %}
     {{ form.as_p }}
-    <input type='submit' value='Zapisz' />
+    <input type='submit' value='save' />
 </form>
 
 {% endblock %}
