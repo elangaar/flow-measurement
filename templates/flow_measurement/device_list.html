@@ -12,20 +12,51 @@
     text-align: center;
     vertical-align: middle;
 }
+.css-serial {
+  counter-reset: serial-number;  /* Set the serial number counter to 0 */
+}
 
+.css-serial th:first-child:before {
+  counter-increment: serial-number;  /* Increment the serial number counter */
+  content: counter(serial-number);  /* Display the counter */
+}
 </style>
 {% endblock head %}
 
 {% block content %}
-<div class="col-sm-7" id="devices-list">
+<div class="col-sm-7">
     <h3 class="mb-3">devices</h3>
-    {% for device in object_list %}
-        <h6> {{ device.name }}, {{ device.serial_number }} </h6>
-    {% empty %}
-        <p>no devices in the database</p>
-    {% endfor %}
+    <table class="table">
+      <thead>
+        <tr>
 
-    <button name="add-device" role="button" class="btn mt-4" data-toggle='modal' data-target='#add-device-modal'>add device</button>
+          <th scope="col">#</th>
+          <th scope="col">name</th>
+          <th scope="col">serial number</th>
+          <th scope="col">type</th>
+          <th scope="col">station</th>
+        </tr>
+      </thead>
+      <tbody class="css-serial">
+        {% for device in object_list %}
+        <tr>
+
+          <th scope="row"></th>
+          <td class="align-middle">{{ device.name }}</td>
+          <td class="align-middle">{{ device.serial_number }}</td>
+          <td class="align-middle">{{ device.get_dev_type_display }}</td>
+          <td class="align-middle"><a href="{% url 'detail-station' device.stationdevice_set.first.station.pk %}"> {{ device.stationdevice_set.first.station.name }} </a></td>
+          <td class="col-md-1"></td>
+          <td><a class="btn btn-link text-warning" href="#">edit</a> </td>
+          <td><a class="btn btn-link text-danger" href="#">delete</a> </td>
+        </tr>
+        {% empty %}
+            <p>no devices in the database</p>
+        {% endfor %}
+      </tbody>
+</table>
+
+    <button name="add-device" role="button" class="btn btn-primary mt-4" data-toggle='modal' data-target='#add-device-modal'>add device</button>
 </div>
 
 {% endblock content %}

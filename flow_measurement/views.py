@@ -4,7 +4,7 @@ import json
 import requests
 
 
-from django.views.generic import TemplateView, ListView, CreateView
+from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.utils.decorators import method_decorator
@@ -61,6 +61,10 @@ class StationListView(ListView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(StationListView, self).dispatch(*args, **kwargs)
+
+
+class StationDetailView(DetailView):
+    model = Station
 
 
 class StationCreateView(CreateView):
@@ -153,12 +157,9 @@ def save_results(request):
         referenced_device = Device.objects.get(id=referenced_device_id)
         measured_device_id = request.POST.get('measured_device')
         measured_device = Device.objects.get(id=measured_device_id)
-        referenced_volume = request.POST.get('refDevVolume')
-        measured_volume = request.POST.get('measDevVolume')
         temperature = float(request.POST.get('temperature'))
         temp_k = temperature + 273
         pressure = float(request.POST.get('pressure'))
-        measurement_date = request.POST.get('measurement_date')
         measurement_time = request.POST.get('measurement_time')
         referenced_volume = float(request.POST.get('refDevVolume'))
         measured_volume = float(request.POST.get('measDevVolume'))
@@ -166,9 +167,8 @@ def save_results(request):
         tcv = referenced_volume * coeff
         referenced_flowrate= get_flowrate(referenced_volume, measurement_time)
         measured_flowrate= get_flowrate(measured_volume, measurement_time)
-        coefficient = format(coeff, '.4f')
         error = format((((measured_volume - tcv) / tcv) * 100), '.2f')
-result_referenced_device = ResultDevice.objects.create(
+        result_referenced_device = ResultDevice.objects.create(
             volume=referenced_volume,
             flowrate=referenced_flowrate,
             device=referenced_device
