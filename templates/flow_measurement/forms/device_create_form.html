@@ -1,10 +1,33 @@
-{% extends 'base.html' %}
+{% load widget_tweaks %}
 
-{% block content %}
-
-<form action='{% url "add-device" %}' method='POST'> {% csrf_token %}
-    {{ form.as_p }}
-    <input type='submit' value='save' />
-</form>
-
-{% endblock %}
+<div class="modal-dialog" role="document">
+    <form action="{% url 'add-device' %}" method="POST" id="add-device-modal" class="form">{% csrf_token %}
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">add device</h4>
+            </div>
+            <div class="modal-body">
+                {% for hidden in form.hidden_fields %}
+                {{ hidden }}
+                {% endfor %}
+                {% for field in form.visible_fields %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field|add_class:'form-control' }}
+                    {% for error in field.errors %}
+                    <span class="help-block">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">close</button>
+                <input type="submit" class="btn btn-primary" value="save changes" />
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    var form_options = { target: '#add-device-modal', success: function(response) {} };
+    $('#add-device').ajaxForm(form_options);
+</script>

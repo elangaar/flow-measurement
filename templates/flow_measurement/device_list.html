@@ -45,7 +45,11 @@
           <td class="align-middle">{{ device.name }}</td>
           <td class="align-middle">{{ device.serial_number }}</td>
           <td class="align-middle">{{ device.get_dev_type_display }}</td>
-          <td class="align-middle"><a href="{% url 'detail-station' device.stationdevice_set.first.station.pk %}"> {{ device.stationdevice_set.first.station.name }} </a></td>
+          {% if device.stationdevice_set.first.station.pk %}
+            <td class="align-middle"><a href="{% url 'detail-station' device.stationdevice_set.first.station.pk %}"> {{ device.stationdevice_set.first.station.name }} </a></td>
+          {% else %}
+            <td>no station</td>
+          {% endif %}
           <td class="col-md-1"></td>
           <td><a class="btn btn-link text-warning" href="#">edit</a> </td>
           <td><a class="btn btn-link text-danger" href="#">delete</a> </td>
@@ -56,33 +60,24 @@
       </tbody>
 </table>
 
-    <button name="add-device" role="button" class="btn btn-primary mt-4" data-toggle='modal' data-target='#add-device-modal'>add device</button>
+    <button role="button" class="btn btn-primary mt-4" data-toggle='modal' data-target='#add-device-modal'>add device</button>
 </div>
 
 {% endblock content %}
 
 {% block modals %}
-<div class='modal' id='add-device-modal' tabindex='0' role='dialog'>
-    <div class='modal-dialog' role='document'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h4>add device</h4>
-            </div>
-            <div class='modal-body'>
-            </div>
-            <div class='modal-footer'>
-                <button type='button' class='btn btn-default'
-                    data-dismiss='modal'>close</button>
-            </div>
-        </div>
-    </div>
-
-</div>
+<div class="modal" id="add-device-modal" tabindex="-1"></div>
 
 <script>
-$('.modal-body').load('/devices/add/', function() {
-
-});
+$('#add-device-modal').on('show.bs.modal', function (event) {
+    var modal = $(this)
+    $.ajax({
+        url: "{% url 'add-device' %}",
+        context: document.body
+    }).done(function(response) {
+        modal.html(response);
+    });
+})
 </script>
 
 {% endblock modals %}

@@ -1,5 +1,4 @@
 from django.db import models
-from django.http import HttpResponse
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
 
@@ -17,7 +16,7 @@ class Station(models.Model):
         return reverse('stations')
 
 class Device(models.Model):
-    name = models.CharField(max_length=36)
+    name = models.CharField(max_length=40)
     serial_number = models.CharField(max_length=35)
     TYPES_OF_DEVICES = (
         ('reference_dev', 'reference device'),
@@ -35,7 +34,7 @@ class Device(models.Model):
 
 class StationDevice(models.Model):
     device = models.ForeignKey('Device')
-    station = models.ForeignKey('Station')
+    station = models.ForeignKey('Station', null=True, blank=True)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
 

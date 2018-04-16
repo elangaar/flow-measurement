@@ -1,5 +1,6 @@
 {% extends "base_left_menu.html" %}
 
+{% block head_title %}stations{% endblock head_title %}
 {% block head %}
 <style>
 .modal-body .container {
@@ -11,46 +12,65 @@
     text-align: center;
     vertical-align: middle;
 }
+.css-serial {
+  counter-reset: serial-number;  /* Set the serial number counter to 0 */
+}
+.css-serial th:first-child:before {
+  counter-increment: serial-number;  /* Increment the serial number counter */
+  content: counter(serial-number);  /* Display the counter */
+}
 </style>
 {% endblock head %}
 
 {% block content %}
 <div class="col-sm-7">
-    <h3 class="mb-3"> Stacje </h3>
-    {% for station in object_list %}
-        <h6> {{ station.name }} - {{ station.longitude }} - {{ station.latitude }} </h6>
-    {% empty %}
-        <p> Brak stacji w bazie danych </p>
-    {% endfor %}
+    <h3 class="mb-3"> stations </h3>
+    <table class="table">
+        <thead>
+        <tr>
 
-    <button role="button" class="btn mt-4" data-toggle='modal' data-target='#add-station-modal'>
-        Dodaj stację </button>
+            <th scope="col">#</th>
+            <th scope="col">name</th>
+            <th scope="col">longitude</th>
+            <th scope="col">latitude</th>
+        </tr>
+        </thead>
+        <tbody class="css-serial">
+        {% for station in object_list %}
+        <tr>
+
+            <th scope="row"></th>
+            <td class="align-middle">{{ station.name }}</td>
+            <td class="align-middle">{{ station.longitude }}</td>
+            <td class="align-middle">{{ station.latitude }}</td>
+            <td class="col-md-1"></td>
+            <td><a class="btn btn-link text-warning" href="#">edit</a> </td>
+            <td><a class="btn btn-link text-danger" href="#">delete</a> </td>
+        </tr>
+        {% empty %}
+        <p>no stations in the database</p>
+        {% endfor %}
+        </tbody>
+    </table>
+    <button role="button" class="btn btn-primary mt-4" data-toggle='modal' data-target='#add-station-modal'>
+        add station </button>
 </div>
 {% endblock content %}
 {% block modals %}
-<div class='modal' id='add-station-modal' tabindex='0' role='dialog'>
-    <div class='modal-dialog' role='document'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h4> Dodaj stację </h4>
-            </div>
-            <div class='modal-body'>
-            </div>
-            <div class='modal-footer'>
-                <button type='button' class='btn btn-default'
-                    data-dismiss='modal'> Zamknij </button>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="modal" id="add-station-modal" tabindex="-1"></div>
 
 <script>
-$('.modal-body').load('/stations/add/', function() {
-    
-});
-
-
+$('#add-station-modal').on('show.bs.modal', function (event) {
+    var modal = $(this)
+    $.ajax({
+        url: "{% url 'add-station' %}",
+        context: document.body
+    }).done(function(response) {
+        modal.html(response);
+    });
+})
 </script>
+
 {% endblock modals %}
 
 

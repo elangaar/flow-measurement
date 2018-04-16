@@ -6,13 +6,16 @@ import requests
 
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 
 from .models import Station, Device, Result, ResultDevice, StationDevice
-from .forms import DeviceForm
+from .forms import DeviceForm, StationForm
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 
 class MainPage(TemplateView):
@@ -70,7 +73,7 @@ class StationDetailView(DetailView):
 class StationCreateView(CreateView):
     template_name = 'flow_measurement/forms/station_create_form.html'
     model = Station
-    fields = '__all__'
+    form_class = StationForm
 
 
 class DeviceListView(ListView):
@@ -97,6 +100,27 @@ class DeviceCreateView(CreateView):
             sd.save()
         form.save()
         return super().form_valid(form)
+
+
+# class DeviceUpdateView(UpdateView):
+#     model = Device
+#     logging.debug('dziala')
+#     form_class = DeviceForm
+#     template_name = 'flow_measurement/forms/device_update_form.html'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         form_sd = StationDeviceForm()
+#         context['sd_form'] = form_sd
+#         return context
+#
+#     def form_valid(self, form):
+#         logging.debug(form)
+#         c_data = sd_form.cleaned_data
+#         logging.debug(f'cleaned data: {c_data}')
+#         return super().form_valid(form)
+
+
 
 
 def parameters(request):
@@ -221,7 +245,7 @@ def get_time(time_str):
 
 
 def get_temp_press(request):
-    API_TOKEN = 'f82f1466e23527d47a9af5dc26373c43'
+    API_TOKEN = '{YOUR_API_TOKEN}'
     API_URL_BASE = 'http://api.openweathermap.org/data/2.5/weather'
     headers = {
         'Content-Type': 'application/json',
