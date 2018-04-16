@@ -13,11 +13,13 @@ A simple application which compare measurements conducted using two types of flo
 
 ### Installation on a local machine
 
-> **Note**: This examples are based on Ubuntu 16.04 distribution.
+> This examples are based on Ubuntu 16.04 distribution. 
+
+> If you want to run this application on your local machine, you need API key from http://openweathermap.org to download temperature and pressure automatically for your station. But application works well without it too.
 
 #### 1. Install Python and virtual environment packages
 
-> Python 3 is pre-installed on Ubuntu 16.04. You can check the version of Python 3 using ```shell $ python3 -V```
+> Python 3 is pre-installed on Ubuntu 16.04. You can check the version of Python 3 using shell ```$ python3 -V```
 
 ```shell
 $ sudo apt-get install python3-pip
