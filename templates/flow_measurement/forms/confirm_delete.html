@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+{% block head_title %} delete {{ object }} {% endblock head_title %}
+{% block content %}
+<form action="" method="POST">
+    {% csrf_token %}
+    <h4>are you sure wou want to delete "{{ object }}"?</h4>
+    <div class="row align-items-center justify-content-center">
+        <a href="{{ view.get_success_url }}" class="btn btn-secondary m-4" role="button">cancel</a>
+        <input class="btn btn-danger" type="submit" value="delete" />
+    </div>
+</form>
+{% endblock content %}

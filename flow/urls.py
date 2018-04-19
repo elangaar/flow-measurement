@@ -26,7 +26,9 @@ from flow_measurement.views import MainPage, MeasurementView, SettingsView
 from flow_measurement.views import InfoView
 from flow_measurement.views import (
     StationListView, DeviceListView,
-    StationCreateView, DeviceCreateView, StationDetailView, # DeviceUpdateView
+    StationCreateView, DeviceCreateView,
+    StationDetailView,
+    DeviceDeleteView, StationDeleteView
 )
 
 urlpatterns = [
@@ -38,14 +40,15 @@ urlpatterns = [
     url(r'^settings/$', SettingsView.as_view(), name='settings'),
     url(r'^info/$', InfoView.as_view(), name='info'),
     url(r'^stations/(?P<pk>\d+)/$', StationDetailView.as_view(), name='detail-station'),
+    url(r'^stations/delete/(?P<pk>\d+)/$', StationDeleteView.as_view(), name='delete-station'),
     url(r'^stations/add/$', StationCreateView.as_view(), name='add-station'),
     url(r'^stations/$', StationListView.as_view(), name='stations'),
-    # url(r'^devices/update/(?P<pk>\d+)/', DeviceUpdateView.as_view(), name='update-device'),
+    url(r'^devices/delete/(?P<pk>\d+)/', DeviceDeleteView.as_view(), name='delete-device'),
     url(r'^devices/add/$', DeviceCreateView.as_view(), name='add-device'),
     url(r'^devices/$', DeviceListView.as_view(), name='devices'),
 
     url(r'^parameters/$', parameters, name='parameters'),
     url(r'^get_temp_press/$', get_temp_press, name='get-temp-press'),
-    url(r'^get_todays_date/$', get_todays_date, name='todays_date'),
+    url(r'^get_todays_date/$', get_todays_date, name='todays-date'),
     url(r'^save_results/$', save_results, name='save-results'),
 ]

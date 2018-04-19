@@ -2,7 +2,7 @@ import datetime
 
 from django import forms
 
-from flow_measurement.models import Device, Station, StationDevice
+from flow_measurement.models import Device, Station
 
 class DeviceForm(forms.ModelForm):
     name = forms.CharField(label='name', max_length=35)
@@ -18,15 +18,6 @@ class DeviceForm(forms.ModelForm):
     class Meta:
         model = Device
         fields = ['name', 'serial_number', 'dev_type', 'station']
-
-
-class StationDeviceForm(forms.Form):
-    start_date = forms.DateField()
-    end_date = forms.DateField()
-
-    class Meta:
-        model = StationDevice
-        fields = ['start_date', 'end_date']
 
 
 class StationForm(forms.ModelForm):

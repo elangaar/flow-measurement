@@ -1,6 +1,7 @@
 {% extends "base_left_menu.html" %}
 
 {% block head_title %}devices{% endblock head_title %}
+
 {% block head %}
 <style>
 .modal-body .container {
@@ -13,12 +14,12 @@
     vertical-align: middle;
 }
 .css-serial {
-  counter-reset: serial-number;  /* Set the serial number counter to 0 */
+  counter-reset: serial-number;
 }
 
 .css-serial th:first-child:before {
-  counter-increment: serial-number;  /* Increment the serial number counter */
-  content: counter(serial-number);  /* Display the counter */
+  counter-increment: serial-number;
+  content: counter(serial-number);
 }
 </style>
 {% endblock head %}
@@ -27,9 +28,9 @@
 <div class="col-sm-7">
     <h3 class="mb-3">devices</h3>
     <table class="table">
+      {% if object_list %}
       <thead>
         <tr>
-
           <th scope="col">#</th>
           <th scope="col">name</th>
           <th scope="col">serial number</th>
@@ -37,22 +38,22 @@
           <th scope="col">station</th>
         </tr>
       </thead>
+      {% endif %}
       <tbody class="css-serial">
         {% for device in object_list %}
         <tr>
-
           <th scope="row"></th>
           <td class="align-middle">{{ device.name }}</td>
           <td class="align-middle">{{ device.serial_number }}</td>
           <td class="align-middle">{{ device.get_dev_type_display }}</td>
-          {% if device.stationdevice_set.first.station.pk %}
-            <td class="align-middle"><a href="{% url 'detail-station' device.stationdevice_set.first.station.pk %}"> {{ device.stationdevice_set.first.station.name }} </a></td>
+          {% if device.station %}
+            <td class="align-middle"><a href="{% url 'detail-station' device.station.pk %}"> {{ device.station.name }} </a></td>
           {% else %}
             <td>no station</td>
           {% endif %}
           <td class="col-md-1"></td>
           <td><a class="btn btn-link text-warning" href="#">edit</a> </td>
-          <td><a class="btn btn-link text-danger" href="#">delete</a> </td>
+          <td><a class="btn btn-link text-danger" href="{% url 'delete-device' device.pk %}">delete</a> </td>
         </tr>
         {% empty %}
             <p>no devices in the database</p>
@@ -62,7 +63,6 @@
 
     <button role="button" class="btn btn-primary mt-4" data-toggle='modal' data-target='#add-device-modal'>add device</button>
 </div>
-
 {% endblock content %}
 
 {% block modals %}
@@ -79,6 +79,5 @@ $('#add-device-modal').on('show.bs.modal', function (event) {
     });
 })
 </script>
-
 {% endblock modals %}
 

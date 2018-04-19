@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 
 UserModel = get_user_model()
 
+
 class Station(models.Model):
     name = models.CharField(max_length=30)
     longitude = models.FloatField()
@@ -15,9 +16,11 @@ class Station(models.Model):
     def get_absolute_url(self):
         return reverse('stations')
 
+
 class Device(models.Model):
     name = models.CharField(max_length=40)
     serial_number = models.CharField(max_length=35)
+    station = models.ForeignKey('Station', null=True, blank=True, on_delete=models.SET_NULL)
     TYPES_OF_DEVICES = (
         ('reference_dev', 'reference device'),
         ('measured_dev', 'measured device'),
@@ -30,17 +33,6 @@ class Device(models.Model):
 
     def get_absolute_url(self):
         return reverse('devices')
-
-
-class StationDevice(models.Model):
-    device = models.ForeignKey('Device')
-    station = models.ForeignKey('Station', null=True, blank=True)
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
-
-    def __str__(self):
-        return '{0} - {1} - {2} - {3}'.format(self.device, self.station,
-                self.start_date, self.end_date)
 
 
 class ResultDevice(models.Model):

@@ -3,15 +3,15 @@ import time
 import json
 import requests
 
-
-from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView
+from django.views.generic import TemplateView, ListView,\
+        CreateView, DetailView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 
-from .models import Station, Device, Result, ResultDevice, StationDevice
+from .models import Station, Device, Result, ResultDevice
 from .forms import DeviceForm, StationForm
 
 import logging
@@ -69,11 +69,25 @@ class StationListView(ListView):
 class StationDetailView(DetailView):
     model = Station
 
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(StationDetailView, self).dispatch(*args, **kwargs)
+
 
 class StationCreateView(CreateView):
     template_name = 'flow_measurement/forms/station_create_form.html'
     model = Station
     form_class = StationForm
+
+
+class StationDeleteView(DeleteView):
+    model = Station
+    template_name = 'flow_measurement/forms/confirm_delete.html'
+    success_url = reverse_lazy('stations')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(StationDeleteView, self).dispatch(*args, **kwargs)
 
 
 class DeviceListView(ListView):
@@ -89,38 +103,19 @@ class DeviceCreateView(CreateView):
     model = Device
     form_class = DeviceForm
 
-    def form_valid(self, form):
-        if form.cleaned_data.get('station') is not None:
-            form.save()
-            device_name = form.cleaned_data.get('name')
-            device = Device.objects.get(name=device_name)
-            station = form.cleaned_data['station']
-            start_date= datetime.date.today()
-            sd = StationDevice.objects.create(device=device, station=station, start_date=start_date)
-            sd.save()
-        form.save()
-        return super().form_valid(form)
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(DeviceCreateView, self).dispatch(*args, **kwargs)
 
 
-# class DeviceUpdateView(UpdateView):
-#     model = Device
-#     logging.debug('dziala')
-#     form_class = DeviceForm
-#     template_name = 'flow_measurement/forms/device_update_form.html'
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         form_sd = StationDeviceForm()
-#         context['sd_form'] = form_sd
-#         return context
-#
-#     def form_valid(self, form):
-#         logging.debug(form)
-#         c_data = sd_form.cleaned_data
-#         logging.debug(f'cleaned data: {c_data}')
-#         return super().form_valid(form)
+class DeviceDeleteView(DeleteView):
+    model = Device
+    template_name = 'flow_measurement/forms/confirm_delete.html'
+    success_url = reverse_lazy('devices')
 
-
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(DeviceDeleteView, self).dispatch(*args, **kwargs)
 
 
 def parameters(request):
